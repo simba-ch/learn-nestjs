@@ -9,3 +9,158 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  email           String       @unique
+  password        String
+  username        String
+  dob             String
+  joiningYear     String
+  avatar          String
+  contactNumber   Int
+  passwordUpdated Boolean      @default(false)
+  department      Department[]
+
+  gender              String?
+  designation         String
+  year                Int?
+  fatherName          String?
+  motherName          String?
+  section             String?
+  batch               String?
+  fatherContactNumber Int?
+  subjects            Subject[]
+  Attendance          Attendance? @relation(fields: [attendanceId], references: [id])
+  attendanceId        String?     @db.ObjectId
+  Marks               Marks?      @relation(fields: [marksId], references: [id])
+  marksId             String?     @db.ObjectId
+}
+
+model Admin {
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  email           String       @unique
+  password        String
+  username        String
+  dob             String
+  joiningYear     String
+  avatar          String
+  contactNumber   Int
+  passwordUpdated Boolean      @default(false)
+  department      Department[]
+}
+
+model Attendance {
+  id                     String    @id @default(auto()) @map("_id") @db.ObjectId
+  totalLecturesByFaculty Int       @default(0)
+  lectureAttended        Int       @default(0)
+  student                Student[]
+  subject                Subject[]
+  User                   User[]
+}
+
+model Department {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  department     String
+  departmentCode String   @unique
+  Faculty        Faculty? @relation(fields: [facultyId], references: [id])
+  facultyId      String?  @db.ObjectId
+  Admin          Admin?   @relation(fields: [adminId], references: [id])
+  adminId        String?  @db.ObjectId
+  Student        Student? @relation(fields: [studentId], references: [id])
+  studentId      String?  @db.ObjectId
+  Subject        Subject? @relation(fields: [subjectId], references: [id])
+  subjectId      String?  @db.ObjectId
+  Test           Test?    @relation(fields: [testId], references: [id])
+  testId         String?  @db.ObjectId
+  User           User?    @relation(fields: [userId], references: [id])
+  userId         String?  @db.ObjectId
+}
+
+model Faculty {
+  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  email           String       @unique
+  avatar          String
+  password        String
+  username        String
+  gender          String
+  designation     String
+  contactNumber   Int
+  dob             String
+  joiningYear     Int
+  passwordUpdated Boolean      @default(false)
+  deparment       Department[]
+}
+
+model Marks {
+  id      String    @id @default(auto()) @map("_id") @db.ObjectId
+  marks   Int       @default(-1)
+  exam    Test[]
+  student Student[]
+  User    User[]
+}
+
+model Notice {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  topic     String
+  date      String
+  content   String
+  from      String
+  noticeFor String
+}
+
+model Student {
+  id                  String       @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  email               String       @unique
+  avatar              String
+  password            String
+  year                Int
+  username            String
+  gender              String
+  fatherName          String
+  motherName          String
+  section             String
+  batch               String
+  contactNumber       Int
+  fatherContactNumber Int
+  dob                 String
+  passwordUpdated     Boolean      @default(false)
+  department          Department[]
+  subjects            Subject[]
+  Attendance          Attendance?  @relation(fields: [attendanceId], references: [id])
+  attendanceId        String?      @db.ObjectId
+  Marks               Marks?       @relation(fields: [marksId], references: [id])
+  marksId             String?      @db.ObjectId
+}
+
+model Subject {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  subjectName   String
+  subjectCode   String
+  totalLectures Int          @default(10)
+  year          String
+  department    Department[]
+  Attendance    Attendance?  @relation(fields: [attendanceId], references: [id])
+  attendanceId  String?      @db.ObjectId
+  Student       Student?     @relation(fields: [studentId], references: [id])
+  studentId     String?      @db.ObjectId
+  User          User?        @relation(fields: [userId], references: [id])
+  userId        String?      @db.ObjectId
+}
+
+model Test {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  test        String
+  subjectCode String
+  totalMarks  Int          @default(10)
+  year        String
+  section     String
+  date        String
+  department  Department[]
+  Marks       Marks?       @relation(fields: [marksId], references: [id])
+  marksId     String?      @db.ObjectId
+}
