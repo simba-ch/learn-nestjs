@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  username String    @unique
+  password String
+  isAdmin  Boolean?
+  auth     Auth[]
+  role     Role[]
+  Article  Article[]
+}
+
+model Auth {
+  id       String            @id @default(auto()) @map("_id") @db.ObjectId
+  authname String
+  user     User?             @relation(fields: [userId], references: [id])
+  userId   String?           @db.ObjectId
+  routes   PermissionRoute[]
+}
+
+model Role {
+  id       String            @id @default(auto()) @map("_id") @db.ObjectId
+  rolename String
+  user     User?             @relation(fields: [userId], references: [id])
+  userId   String?           @db.ObjectId
+  routers  PermissionRoute[]
+}
+
+model Route {
+  id         String            @id @default(auto()) @map("_id") @db.ObjectId
+  routename  String
+  permission PermissionRoute[]
+}
+
+model PermissionRoute {
+  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+  authId  String? @db.ObjectId
+  auth    Auth?   @relation(fields: [authId], references: [id])
+  routeId String? @db.ObjectId
+  route   Route?  @relation(fields: [routeId], references: [id])
+  roleId  String? @db.ObjectId
+  role    Role?   @relation(fields: [roleId], references: [id])
+}
+
+model Article {
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  isPublished Boolean
+  authorId    String  @db.ObjectId
+  user        User    @relation(fields: [authorId], references: [id])
+}
