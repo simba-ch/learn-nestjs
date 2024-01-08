@@ -40,14 +40,14 @@ model User {
 
 model Admin {
   id              String       @id @default(auto()) @map("_id") @db.ObjectId
-  name            String
+  name            String?
   email           String       @unique
   password        String
-  username        String
-  dob             String
-  joiningYear     String
-  avatar          String
-  contactNumber   Int
+  username        String?
+  dob             String?
+  joiningYear     String?
+  avatar          String?
+  contactNumber   Int?
   passwordUpdated Boolean      @default(false)
   department      Department[]
 }

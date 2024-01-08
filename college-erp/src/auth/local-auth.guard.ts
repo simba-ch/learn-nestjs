@@ -1,23 +1,26 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import "rxjs"
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { Reflector } from '@nestjs/core';
+import { ROLE } from './role.enum';
 @Injectable()
-export class LocalAuthGuard extends AuthGuard("local") {
-  canActivate(
-    context: ExecutionContext,
-  ) {
-    const result = super.canActivate(context);
-    console.log("🚀 ~ file: local-auth.guard.ts:11 ~ LocalAuthGuard ~ classLocalAuthGuardextendsAuthGuard ~ result:", result)
-    return result
+export class LocalAuthGuard implements CanActivate {
+  constructor(private readonly authService: AuthService, private readonly reflector: Reflector) {
   }
 
-  handleRequest(err: any, user: any, info: any, context: ExecutionContext, status?: any) {
-    console.log("🚀 ~ file: local-auth.guard.ts:13 ~ LocalAuthGuard ~ handleRequest ~ status:", status)
-    console.log("🚀 ~ file: local-auth.guard.ts:13 ~ LocalAuthGuard ~ handleRequest ~ context:", context)
-    console.log("🚀 ~ file: local-auth.guard.ts:13 ~ LocalAuthGuard ~ handleRequest ~ info:", info)
-    console.log("🚀 ~ file: local-auth.guard.ts:13 ~ LocalAuthGuard ~ handleRequest ~ user:", user)
-    console.log("🚀 ~ file: local-auth.guard.ts:13 ~ LocalAuthGuard ~ handleRequest ~ err:", err)
-    return user
+
+  async canActivate(
+    context: ExecutionContext,
+  ): Promise<boolean> {
+    const role = this.reflector.get(ROLE, context.getHandler())
+    const request = context.switchToHttp().getRequest()
+    const { username, password } = request.body
+    const user = await this.authService.validate(role, username, password)
+    if (user) {
+      request.user = user
+      return true
+    }
+    request.user = null
+    return false
   }
 
 }
