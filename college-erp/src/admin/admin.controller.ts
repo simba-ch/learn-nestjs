@@ -5,7 +5,7 @@ import { ROLE, Roles } from 'src/auth/role.enum';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
-@Controller('admin')
+@Controller('/api/admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService, private readonly authService: AuthService) { }
 
@@ -13,13 +13,27 @@ export class AdminController {
   @Post("/login")
   @UseGuards(LocalAuthGuard)
   @SetMetadata(ROLE, Roles.ADMIN)
-  login(@Request() req) {
+  adminLogin(@Request() req) {
     return this.authService.login(req.user)
   }
 
-  @Get()
+
+  @Post("/updatepassword")
   @UseGuards(JwtAuthGuard)
-  getProfile(@Request() req) {
-    return req.user
+  updatedPassword() {
+
+  }
+
+
+  @Get("/getallstudent")
+  @UseGuards(JwtAuthGuard)
+  getAllStudent() {
+    return 123123
+  }
+
+  @Post("/createnotice")
+  @UseGuards(JwtAuthGuard)
+  createNotice() {
+
   }
 }
