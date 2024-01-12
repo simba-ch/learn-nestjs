@@ -6,9 +6,12 @@ import { FacultyModule } from './faculty/faculty.module';
 import { StudentModule } from './student/student.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { NoticeModule } from './notice/notice.module';
+import { DepartmentModule } from './department/department.module';
+import { SubjectModule } from './subject/subject.module';
 
 @Module({
-  imports: [AdminModule, FacultyModule, StudentModule, AuthModule, PrismaModule],
+  imports: [AdminModule, FacultyModule, StudentModule, AuthModule, PrismaModule, NoticeModule, DepartmentModule, SubjectModule],
   controllers: [AppController],
   providers: [AppService],
 })

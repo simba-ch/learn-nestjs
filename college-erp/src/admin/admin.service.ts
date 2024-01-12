@@ -8,11 +8,9 @@ export class AdminService {
 
     }
 
-    async findOne(email: string): Promise<Admin | undefined> {
+    async findOne(where: Prisma.AdminWhereUniqueInput): Promise<Admin | undefined> {
         return this.prismaService.admin.findUnique({
-            where: {
-                email
-            }
+            where
         })
     }
 
@@ -21,5 +19,20 @@ export class AdminService {
             where,
             data
         })
+    }
+
+
+    async find(where?: Prisma.AdminWhereInput): Promise<Admin[] | undefined> {
+        return this.prismaService.admin.findMany({ where })
+    }
+
+
+    async create(data: Prisma.AdminCreateInput) {
+        return this.prismaService.admin.create({ data })
+    }
+
+
+    async delete(where: Prisma.AdminDeleteArgs["where"]): Promise<Admin | undefined> {
+        return this.prismaService.admin.delete({ where })
     }
 }

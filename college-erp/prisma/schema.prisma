@@ -10,46 +10,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id              String       @id @default(auto()) @map("_id") @db.ObjectId
-  name            String
-  email           String       @unique
-  password        String
-  username        String
-  dob             String
-  joiningYear     String
-  avatar          String
-  contactNumber   Int
-  passwordUpdated Boolean      @default(false)
-  department      Department[]
-
-  gender              String?
-  designation         String
-  year                Int?
-  fatherName          String?
-  motherName          String?
-  section             String?
-  batch               String?
-  fatherContactNumber Int?
-  subjects            Subject[]
-  Attendance          Attendance? @relation(fields: [attendanceId], references: [id])
-  attendanceId        String?     @db.ObjectId
-  Marks               Marks?      @relation(fields: [marksId], references: [id])
-  marksId             String?     @db.ObjectId
-}
-
 model Admin {
-  id              String       @id @default(auto()) @map("_id") @db.ObjectId
-  name            String?
-  email           String       @unique
+  id              String  @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  email           String  @unique
   password        String
-  username        String?
+  username        String  @unique
   dob             String?
   joiningYear     String?
   avatar          String?
-  contactNumber   Int?
-  passwordUpdated Boolean      @default(false)
-  department      Department[]
+  contactNumber   String?
+  passwordUpdated Boolean @default(false)
+  department      String?
 }
 
 model Attendance {
@@ -58,41 +30,33 @@ model Attendance {
   lectureAttended        Int       @default(0)
   student                Student[]
   subject                Subject[]
-  User                   User[]
 }
 
 model Department {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  id             String @id @default(auto()) @map("_id") @db.ObjectId
   department     String
-  departmentCode String   @unique
-  Faculty        Faculty? @relation(fields: [facultyId], references: [id])
-  facultyId      String?  @db.ObjectId
-  Admin          Admin?   @relation(fields: [adminId], references: [id])
-  adminId        String?  @db.ObjectId
-  Student        Student? @relation(fields: [studentId], references: [id])
-  studentId      String?  @db.ObjectId
-  Subject        Subject? @relation(fields: [subjectId], references: [id])
-  subjectId      String?  @db.ObjectId
-  Test           Test?    @relation(fields: [testId], references: [id])
-  testId         String?  @db.ObjectId
-  User           User?    @relation(fields: [userId], references: [id])
-  userId         String?  @db.ObjectId
+  departmentCode String @unique
+}
+
+model Index {
+  id               String @id @default(auto()) @map("_id") @db.ObjectId
+  departmentLatest String @default("00")
 }
 
 model Faculty {
-  id              String       @id @default(auto()) @map("_id") @db.ObjectId
+  id              String  @id @default(auto()) @map("_id") @db.ObjectId
   name            String
-  email           String       @unique
-  avatar          String
-  password        String
-  username        String
-  gender          String
+  email           String  @unique
+  avatar          String?
+  password        String?
+  username        String?
+  gender          String?
   designation     String
-  contactNumber   Int
+  contactNumber   String?
   dob             String
   joiningYear     Int
-  passwordUpdated Boolean      @default(false)
-  deparment       Department[]
+  passwordUpdated Boolean @default(false)
+  department      String
 }
 
 model Marks {
@@ -100,7 +64,6 @@ model Marks {
   marks   Int       @default(-1)
   exam    Test[]
   student Student[]
-  User    User[]
 }
 
 model Notice {
@@ -113,54 +76,60 @@ model Notice {
 }
 
 model Student {
-  id                  String       @id @default(auto()) @map("_id") @db.ObjectId
+  id                  String             @id @default(auto()) @map("_id") @db.ObjectId
   name                String
-  email               String       @unique
-  avatar              String
+  email               String             @unique
+  avatar              String?
   password            String
-  year                Int
-  username            String
-  gender              String
-  fatherName          String
-  motherName          String
+  year                String
+  username            String?
+  gender              String?
+  fatherName          String?
+  motherName          String?
   section             String
-  batch               String
-  contactNumber       Int
-  fatherContactNumber Int
+  batch               String?
+  contactNumber       String?
+  fatherContactNumber String?
+  motherContactNumber String?
   dob                 String
-  passwordUpdated     Boolean      @default(false)
-  department          Department[]
-  subjects            Subject[]
-  Attendance          Attendance?  @relation(fields: [attendanceId], references: [id])
-  attendanceId        String?      @db.ObjectId
-  Marks               Marks?       @relation(fields: [marksId], references: [id])
-  marksId             String?      @db.ObjectId
+  passwordUpdated     Boolean            @default(false)
+  department          String
+  subjects            StudentOfSubject[]
+  Attendance          Attendance?        @relation(fields: [attendanceId], references: [id])
+  attendanceId        String?            @db.ObjectId
+  Marks               Marks?             @relation(fields: [marksId], references: [id])
+  marksId             String?            @db.ObjectId
 }
 
 model Subject {
-  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  id            String             @id @default(auto()) @map("_id") @db.ObjectId
   subjectName   String
   subjectCode   String
-  totalLectures Int          @default(10)
+  totalLectures Int                @default(10)
   year          String
-  department    Department[]
-  Attendance    Attendance?  @relation(fields: [attendanceId], references: [id])
-  attendanceId  String?      @db.ObjectId
-  Student       Student?     @relation(fields: [studentId], references: [id])
-  studentId     String?      @db.ObjectId
-  User          User?        @relation(fields: [userId], references: [id])
-  userId        String?      @db.ObjectId
+  department    String
+  Attendance    Attendance?        @relation(fields: [attendanceId], references: [id])
+  attendanceId  String?            @db.ObjectId
+  students      StudentOfSubject[]
+}
+
+model StudentOfSubject {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  student   Student? @relation(fields: [studentId], references: [id])
+  studentId String?  @db.ObjectId
+  subject   Subject? @relation(fields: [subjectId], references: [id])
+  subjectId String?  @db.ObjectId
 }
 
 model Test {
-  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
   test        String
   subjectCode String
-  totalMarks  Int          @default(10)
+  totalMarks  Int     @default(10)
   year        String
   section     String
   date        String
-  department  Department[]
-  Marks       Marks?       @relation(fields: [marksId], references: [id])
-  marksId     String?      @db.ObjectId
+  department  String
+  Marks       Marks?  @relation(fields: [marksId], references: [id])
+  marksId     String? @db.ObjectId
 }

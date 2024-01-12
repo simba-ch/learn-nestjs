@@ -15,7 +15,7 @@ export class AuthService {
 
     }
 
-    async validate(userType: Roles, email: string, password: string) {
+    async validate(userType: Roles, username: string, password: string) {
         let userService
         switch (userType) {
             case Roles.ADMIN:
@@ -28,8 +28,8 @@ export class AuthService {
                 break;
         }
 
-        const user = await userService.findOne(email)
-        if (user && user.password === password) {
+        const user = await userService.findOne({username})
+        if (user && (user.password === password)) {
             const { password, ...result } = user;
             return result
         }
@@ -38,7 +38,7 @@ export class AuthService {
 
 
     async login(user: any) {
-        const payload = { username: user.email, sub: user.id }
+        const payload = { username: user.username, sub: user.id }
         return {
             access_token: this.jwtService.sign(payload)
         }

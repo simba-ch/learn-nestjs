@@ -11,7 +11,10 @@ const JWT_SECRET = process.env.JWT_SECRET
 @Global()
 @Module({
   imports: [AdminModule, FacultyModule, StudentModule,PassportModule,JwtModule.register({
-    secret: JWT_SECRET
+    secret: JWT_SECRET,
+    signOptions:{
+      expiresIn:"1h"
+    }
   })],
   providers: [AuthService, JwtStratege],
   exports: [AuthService]
