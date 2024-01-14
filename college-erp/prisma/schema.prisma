@@ -24,12 +24,14 @@ model Admin {
   department      String?
 }
 
-model Attendance {
-  id                     String    @id @default(auto()) @map("_id") @db.ObjectId
-  totalLecturesByFaculty Int       @default(0)
-  lectureAttended        Int       @default(0)
-  student                Student[]
-  subject                Subject[]
+model Attendence {
+  id                     String   @id @default(auto()) @map("_id") @db.ObjectId
+  totalLecturesByFaculty Int      @default(0)
+  lectureAttended        Int      @default(0)
+  student                Student? @relation(fields: [studentId], references: [id])
+  subject                Subject? @relation(fields: [subjectId], references: [id])
+  subjectId              String   @db.ObjectId
+  studentId              String   @db.ObjectId
 }
 
 model Department {
@@ -60,10 +62,12 @@ model Faculty {
 }
 
 model Marks {
-  id      String    @id @default(auto()) @map("_id") @db.ObjectId
-  marks   Int       @default(-1)
-  exam    Test[]
-  student Student[]
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  marks     Int      @default(-1)
+  exam      Test?    @relation(fields: [testId], references: [id])
+  testId    String   @unique @db.ObjectId
+  student   Student? @relation(fields: [studentId], references: [id])
+  studentId String   @unique @db.ObjectId
 }
 
 model Notice {
@@ -95,10 +99,9 @@ model Student {
   passwordUpdated     Boolean            @default(false)
   department          String
   subjects            StudentOfSubject[]
-  Attendance          Attendance?        @relation(fields: [attendanceId], references: [id])
-  attendanceId        String?            @db.ObjectId
-  Marks               Marks?             @relation(fields: [marksId], references: [id])
-  marksId             String?            @db.ObjectId
+  attendence          Attendence[]
+  attendenceId        String?            @db.ObjectId
+  Marks               Marks?
 }
 
 model Subject {
@@ -108,8 +111,7 @@ model Subject {
   totalLectures Int                @default(10)
   year          String
   department    String
-  Attendance    Attendance?        @relation(fields: [attendanceId], references: [id])
-  attendanceId  String?            @db.ObjectId
+  attendence    Attendence[]
   students      StudentOfSubject[]
 }
 
@@ -122,14 +124,13 @@ model StudentOfSubject {
 }
 
 model Test {
-  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
   test        String
   subjectCode String
-  totalMarks  Int     @default(10)
+  totalMarks  Int    @default(10)
   year        String
   section     String
   date        String
   department  String
-  Marks       Marks?  @relation(fields: [marksId], references: [id])
-  marksId     String? @db.ObjectId
+  Marks       Marks?
 }

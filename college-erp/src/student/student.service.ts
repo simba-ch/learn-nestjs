@@ -15,12 +15,47 @@ export class StudentService {
   }
 
 
+  async findFirst(where: Prisma.StudentWhereInput) {
+    return this.prismaService.student.findFirst({
+      where
+    })
+  }
+
+
   async find(where?: Prisma.StudentWhereInput): Promise<Student[] | undefined> {
     return this.prismaService.student.findMany({ where })
   }
 
   async create(data: Prisma.StudentCreateInput): Promise<Student> {
     return this.prismaService.student.create({ data })
+  }
+
+  async delete(where: Prisma.StudentWhereUniqueInput) {
+    return this.prismaService.student.delete({
+      where
+    })
+  }
+
+
+  async update(where: Prisma.StudentWhereUniqueInput, data: Prisma.StudentUpdateInput) {
+    return this.prismaService.student.update({
+      where,
+      data
+    })
+  }
+
+
+  async getAttendance(where: Prisma.StudentWhereInput) {
+    return this.prismaService.student.findFirst({
+      where,
+      include: {
+        attendence: {
+          include: {
+            subject: true
+          }
+        }
+      }
+    })
   }
 
 }

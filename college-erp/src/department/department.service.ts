@@ -47,4 +47,11 @@ export class DepartmentService {
 
         return newDepartment
     }
+
+
+    async delete(where: Prisma.DepartmentWhereInput) {
+        return this.prismaService.department.deleteMany({
+            where
+        })
+    }
 }

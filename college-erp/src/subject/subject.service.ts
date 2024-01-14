@@ -35,4 +35,8 @@ export class SubjectService {
 
         return newSubject
     }
+
+    async delete(where: Prisma.SubjectWhereUniqueInput) {
+        return this.prismaService.subject.delete({ where })
+    }
 }

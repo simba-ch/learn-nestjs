@@ -23,4 +23,19 @@ export class FacultyService {
             data
         })
     }
+
+    async delete(where: Prisma.FacultyWhereUniqueInput) {
+        return this.prismaService.faculty.delete({
+            where
+        })
+    }
+
+    async update(where: Prisma.FacultyWhereUniqueInput, data: Prisma.FacultyUpdateInput) {
+        return this.prismaService.faculty.update({
+            where,
+            data
+        })
+    }
+
+
 }

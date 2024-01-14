@@ -341,25 +341,37 @@ export class AdminController {
 
   @Post("/deletefaculty")
   @UseGuards(JwtAuthGuard)
-  deleteFaculty() {
-
+  async deleteFaculty(@Body("faculties") faculties) {
+    await Promise.all(faculties.map(facultyId => this.facultyService.delete({ id: facultyId })))
+    return {
+      message: "Faculty Deleted"
+    }
   }
 
   @Post("/deletestudent")
   @UseGuards(JwtAuthGuard)
-  deleteStudent() {
-
+  async deleteStudent(@Body("students") students) {
+    await Promise.all(students.map(studentId => this.studentService.delete({ id: studentId })))
+    return {
+      message: "Student Deleted"
+    }
   }
 
   @Post("/deletedepartment")
   @UseGuards(JwtAuthGuard)
-  deleteDepartment() {
-
+  async deleteDepartment(@Body("department") department) {
+    await this.departmentService.delete({ department })
+    return {
+      message: "Student Deleted"
+    }
   }
 
   @Post("/deletesubject")
   @UseGuards(JwtAuthGuard)
-  deleteSubject() {
-
+  async deleteSubject(@Body("subjects") subjects) {
+    await Promise.all(subjects.map(subjectId => this.subjectService.delete({ id: subjectId })))
+    return {
+      message: "Subject Deleted"
+    }
   }
 }
