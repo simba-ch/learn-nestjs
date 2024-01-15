@@ -1,11 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { Prisma, Subject } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { StudentService } from 'src/student/student.service';
 
 @Injectable()
 export class SubjectService {
-    constructor(private readonly prismaService: PrismaService, private readonly studentService: StudentService) { }
+    constructor(private readonly prismaService: PrismaService,
+        @Inject(forwardRef(() => StudentService))
+        private readonly studentService: StudentService) { }
 
     async find(where?: Prisma.SubjectWhereInput): Promise<Subject[] | undefined> {
         return this.prismaService.subject.findMany({ where })
@@ -38,5 +40,12 @@ export class SubjectService {
 
     async delete(where: Prisma.SubjectWhereUniqueInput) {
         return this.prismaService.subject.delete({ where })
+    }
+
+    async update(where: Prisma.SubjectWhereUniqueInput, data: Prisma.SubjectUpdateInput) {
+        return this.prismaService.subject.update({
+            where,
+            data
+        })
     }
 }

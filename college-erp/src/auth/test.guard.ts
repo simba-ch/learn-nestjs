@@ -4,7 +4,7 @@ import { Observable } from "rxjs";
 @Injectable()
 export class TestGuard implements CanActivate{
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        console.log(132123123);
+
         
         return true
     }

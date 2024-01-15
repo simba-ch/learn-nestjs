@@ -28,7 +28,7 @@ export class AuthService {
                 break;
         }
 
-        const user = await userService.findOne({username})
+        const user = await userService.findOne({ username })
         if (user && (user.password === password)) {
             const { password, ...result } = user;
             return result
@@ -38,10 +38,8 @@ export class AuthService {
 
 
     async login(user: any) {
-        const payload = { username: user.username, sub: user.id }
-        return {
-            access_token: this.jwtService.sign(payload)
-        }
+        const payload = { email: user.email, id: user.id }
+        return { result: user, token: this.jwtService.sign(payload) }
     }
 
 

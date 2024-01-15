@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Post, Request, SetMetadata, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Inject, Post, Request, SetMetadata, UseGuards, forwardRef } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { AuthService } from 'src/auth/auth.service';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
@@ -13,8 +13,11 @@ export class StudentController {
   constructor(
     private readonly authService: AuthService,
     private readonly studentService: StudentService,
+    @Inject(forwardRef(() => TestService))
     private readonly testService: TestService,
+    @Inject(forwardRef(() => SubjectService))
     private readonly subjectService: SubjectService,
+    @Inject(forwardRef(() => MarksService))
     private readonly marksService: MarksService
   ) { }
 

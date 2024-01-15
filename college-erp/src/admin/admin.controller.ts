@@ -288,6 +288,28 @@ export class AdminController {
       year,
     })
 
+    const subjects = await this.subjectService.find({ department, year })
+    if (subjects.length !== 0) {
+      for (let i = 0; i < subjects.length; i++) {
+        await this.subjectService.update({
+          id: subjects[i].id
+        }, {
+          students: {
+            create: {
+              student: {
+                connect: newStudent
+              }
+            }
+          }
+        })
+      }
+    }
+
+    return {
+      success: true,
+      message: "Student registerd successfully",
+      response: newStudent
+    }
   }
 
   @Post("/getstudent")
