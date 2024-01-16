@@ -25,7 +25,16 @@ export class DepartmentService {
 
 
     async addOne(department: string): Promise<Department> {
-        const { id, departmentLatest } = await this.prismaService.index.findFirst()
+        let id, departmentLatest
+        const index = await this.prismaService.index.findFirst()
+        if (index) {
+            id = index.id;
+            departmentLatest = index.departmentLatest
+        } else {
+            const newIndex = await this.prismaService.index.create({})
+            id = newIndex.id;
+            departmentLatest = newIndex.departmentLatest
+        }
         const departmentCode = (parseInt(departmentLatest) + 1).toString().padStart(2, "0")
         const data = {
             department,

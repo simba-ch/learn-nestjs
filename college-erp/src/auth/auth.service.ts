@@ -4,7 +4,7 @@ import { FacultyService } from 'src/faculty/faculty.service';
 import { StudentService } from 'src/student/student.service';
 import { Roles } from './role.enum';
 import { JwtService } from '@nestjs/jwt';
-
+import * as bcrypt from "bcrypt"
 @Injectable()
 export class AuthService {
     constructor(private readonly adminService: AdminService,
@@ -16,20 +16,21 @@ export class AuthService {
     }
 
     async validate(userType: Roles, username: string, password: string) {
-        let userService
+        let userService;
         switch (userType) {
             case Roles.ADMIN:
                 userService = this.adminService
                 break;
             case Roles.FACULTY:
                 userService = this.facultyService
+                break;
             default:
                 userService = this.studentService
                 break;
         }
 
         const user = await userService.findOne({ username })
-        if (user && (user.password === password)) {
+        if (user && (await bcrypt.compare(password, user.password))) {
             const { password, ...result } = user;
             return result
         }

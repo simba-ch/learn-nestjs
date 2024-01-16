@@ -9,7 +9,7 @@ export class FacultyService {
     }
 
     async findOne(where: Prisma.FacultyWhereUniqueInput): Promise<Faculty | undefined> {
-        return this.prismaService.faculty.findUnique({
+        return this.prismaService.faculty.findFirst({
             where
         })
     }

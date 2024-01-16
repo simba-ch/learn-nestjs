@@ -55,10 +55,10 @@ model Faculty {
   gender          String?
   designation     String
   contactNumber   String?
-  dob             String
-  joiningYear     Int
+  dob             String?
+  joiningYear     String?
   passwordUpdated Boolean @default(false)
-  department      String
+  department      String?
 }
 
 model Marks {

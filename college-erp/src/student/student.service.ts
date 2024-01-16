@@ -7,7 +7,7 @@ export class StudentService {
   constructor(private readonly prismaService: PrismaService) { }
 
   async findOne(where: Prisma.StudentWhereUniqueInput): Promise<Student | undefined> {
-    return this.prismaService.student.findUnique({
+    return this.prismaService.student.findFirst({
       where
     })
   }

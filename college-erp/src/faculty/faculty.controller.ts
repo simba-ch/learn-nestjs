@@ -4,7 +4,7 @@ import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 import { ROLE, Roles } from 'src/auth/role.enum';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import bcrypt from "bcrypt";
+import * as bcrypt from "bcrypt";
 import { TestService } from 'src/test/test.service';
 import { StudentService } from 'src/student/student.service';
 import { MarksService } from 'src/marks/marks.service';
