@@ -9,3 +9,25 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  role Roles  @default(Guest)
+  location Unsupported("POLYGON")
+  comment Type @default(Twitter)
+}
+
+enum Roles {
+  Admin 
+  Guest
+}
+
+type Photo {
+  id String @db.ObjectId
+  height Int
+}
+
+enum Type {
+  Blog
+  Twitter @map("comment_twitter")
+}
