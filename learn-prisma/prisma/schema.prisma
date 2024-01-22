@@ -52,3 +52,13 @@ model CategoriesOnPosts {
   assignedAt DateTime  @default(now())
   assignedBy String
 }
+
+type Photo {
+  id     String @db.ObjectId
+  height Int
+}
+
+enum Type {
+  Blog
+  Twitter @map("comment_twitter")
+}
