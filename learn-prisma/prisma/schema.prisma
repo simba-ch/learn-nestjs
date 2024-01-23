@@ -10,13 +10,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// generator docs {
+//   provider = "node node_modules/prisma-docs-generator"
+// }
+
 model User {
-  id      String   @id @default(auto()) @map("_id") @db.ObjectId
-  email   String   @unique
-  role    Role     @default(USER)
-  posts   Post[]
-  profile Profile?
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  name        String?
+  email       String       @unique
+  role        Role         @default(USER)
+  posts       Post[]
+  profile     Profile?
+  successorId String       @unique @db.ObjectId
+  successor   User?    @relation("BlogOwnerHistory", fields: [successorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  predecessor  User?    @relation("BlogOwnerHistory")
 }
+
+
+
+
 
 enum Role {
   ADMIN
@@ -62,3 +74,6 @@ enum Type {
   Blog
   Twitter @map("comment_twitter")
 }
+
+
+ 
