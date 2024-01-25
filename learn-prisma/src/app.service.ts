@@ -69,5 +69,6 @@ export class AppService {
     Prisma.validator<Prisma.UserDefaultArgs>()({
       select: { email: true, name: true }
     })
+    this.prismaService.$use
   }
 }
