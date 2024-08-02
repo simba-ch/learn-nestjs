@@ -8,15 +8,18 @@ async function main() {
         data: [
             {
                 username: 'john',
-                password: 'changeme'
+                password: 'changeme',
+                isAdmin: true
             },
             {
                 username: 'chris',
-                password: 'secret'
+                password: 'secret',
+                isAdmin: false
             },
             {
                 username: 'maria',
-                password: 'guess'
+                password: 'guess',
+                isAdmin: false
             },
         ]
     })
