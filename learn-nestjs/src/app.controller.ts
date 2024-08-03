@@ -11,6 +11,7 @@ import { LoggingInterceptor } from './logging/logging.interceptor';
 import { Interceptor1Interceptor } from './interceptor1/interceptor1.interceptor';
 import { Module1Service } from './module1/module1.service';
 import { Module2Service } from './module2/module2.service';
+import { Aggregation } from './aggregation/aggregation.decorator';
 
 @Controller()
 export class AppController {
@@ -48,7 +49,7 @@ export class AppController {
   @UseInterceptors(LoggingInterceptor, Interceptor1Interceptor)
   @UsePipes(Route1Pipe, Route2Pipe)
   async testOrder(@Query('param1', Param1Pipe, Param2Pipe) param1Pipe, @Query('param2', Param3Pipe) param2Pipe) {
-    console.log('order handler');
+    console.log('route handler');
 
     return 'order success'
   }
@@ -64,6 +65,9 @@ export class AppController {
 
   //   return 'order success'
   // }
+
+
+
 
 
   @Get('say_hello/:id')
@@ -82,7 +86,15 @@ export class AppController {
 
 
   @Get('global_guard')
-  async testGlobalGuard(){
+  async testGlobalGuard() {
     return 'global guard route success'
+  }
+
+  @Aggregation()
+  @Get("aggregation")
+  async testAggregationDecorators(@Query('param1', Param1Pipe, Param2Pipe) param1Pipe, @Query('param2', Param3Pipe) param2Pipe) {
+    console.log('route handler');
+
+    return 'aggregation route success'
   }
 }

@@ -6,15 +6,14 @@ client side ---> middleware ---> route handle ---> middleware ---> client side
 client side ---> guard ---> interceptor ---> pipe ---> route handle ---> interceptor ---> client side
 
 # 补强：
+
 **_全局守卫，排除特定路由？_**
 全局守卫需要自己实例化，
-reflector不会被依赖注入需要自己实例化（知识点）
+reflector 不会被依赖注入需要自己实例化（知识点）
 
-根据request对象中的路由来判断？
-根据SetMetadata来判断（怎么注入reflector实例）
+根据 request 对象中的路由来判断？
+根据 SetMetadata 来判断（怎么注入 reflector 实例）
 有没有更好的办法
-
-
 
 # 问题与解答：
 
@@ -24,7 +23,7 @@ reflector不会被依赖注入需要自己实例化（知识点）
 
 - 模块间的相互引用
   比如：有一个父模块和若干子模块和子服务，在父模块中导入这些子模块，在子模块中可以使用其他子模块吗？
-  不可以，如果 A 模块依赖 B 模块，B 模块又依赖 A 模块，参考 **_循环依赖_**
+  不可以，如果 A 模块依赖 B 模块，B 模块又依赖 A 模块，参考[循环依赖](#循环依赖)
 
 # 概述
 
@@ -119,10 +118,18 @@ findOne(@Param('id', UserByIdPipe) userEntity: UserEntity) {
 ### 装饰器聚合
 
 执行顺序？
+与定义顺序无关，参考[请求执行顺序](#请求执行顺序)
 
 # 基本原理
 
+## 自定义提供者
 
+
+## 异步提供者
+
+## 动态模块
+
+## 注入作用域
 
 ## 循环依赖
 
@@ -133,10 +140,17 @@ findOne(@Param('id', UserByIdPipe) userEntity: UserEntity) {
 ## 应用上下文
 
 - reflect
-四个方法分别是什么意思
-
+  四个方法分别是什么意思
 
 - SetMetadata
+
+## 生命周期事件
+
+## 跨平台
+
+## 测试
+
+
 
 # 技术
 
