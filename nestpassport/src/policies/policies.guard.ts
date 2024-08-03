@@ -1,6 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Observable } from 'rxjs';
 import { AppAbility, CaslAbilityFactory } from 'src/casl/casl-ability.factory';
 import { CHECK_POLICIES_KEY } from 'src/check-policies/check-policies.decorator';
 import { PolicyHandler } from 'src/types';
