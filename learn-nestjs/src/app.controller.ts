@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Query, UseGuards, UseInterceptors, UsePipes } from '@nestjs/common';
+import { Controller, Get, Inject, Param, ParseIntPipe, Query, UseGuards, UseInterceptors, UsePipes } from '@nestjs/common';
 import { Param1Pipe } from './param1/param1.pipe';
 import { Param2Pipe } from './param2/param2.pipe';
 import { Route1Pipe } from './route1/route1.pipe';
@@ -12,12 +12,14 @@ import { Interceptor1Interceptor } from './interceptor1/interceptor1.interceptor
 import { Module1Service } from './module1/module1.service';
 import { Module2Service } from './module2/module2.service';
 import { Aggregation } from './aggregation/aggregation.decorator';
+import { Custom } from './custom/custom';
 
 @Controller()
 export class AppController {
   constructor(
     private readonly module1Service: Module1Service,
     // private readonly module2Service: Module2Service,
+    @Inject('Custom') private readonly customProvider: Custom
   ) { }
 
   @UsePipes(Route1Pipe, Route2Pipe)
@@ -96,5 +98,11 @@ export class AppController {
     console.log('route handler');
 
     return 'aggregation route success'
+  }
+
+
+  @Get('custom_provider')
+  async testCustomProvider() {
+    return this.customProvider.sayHello()
   }
 }

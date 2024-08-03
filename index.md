@@ -122,7 +122,123 @@ findOne(@Param('id', UserByIdPipe) userEntity: UserEntity) {
 
 # 基本原理
 
+## 依赖注入
+
+```ts
+// cats.service.ts
+import { Injectable } from "@nestjs/common";
+import { Cat } from "./interfaces/cat.interface";
+// 1. 用`@Injectable()`装饰器声明`CatsService`是一个可以由`Nest IoC`容器管理的类
+@Injectable()
+export class CatsService {
+  private readonly cats: Cat[] = [];
+
+  findAll(): Cat[] {
+    return this.cats;
+  }
+}
+
+// cats.controller.ts
+import { Controller, Get } from "@nestjs/common";
+import { CatsService } from "./cats.service";
+import { Cat } from "./interfaces/cat.interface";
+
+@Controller("cats")
+export class CatsController {
+  // 2. 在`CatsController`中声明一个依赖于`CatsService`令牌（token）的构造函数注入
+  constructor(private readonly catsService: CatsService) {}
+
+  @Get()
+  async findAll(): Promise<Cat[]> {
+    return this.catsService.findAll();
+  }
+}
+
+// app.module.ts
+import { Module } from "@nestjs/common";
+import { CatsController } from "./cats/cats.controller";
+import { CatsService } from "./cats/cats.service";
+
+@Module({
+  controllers: [CatsController],
+  providers: [CatsService], //3. 将标记 `CatsService`与 `cats.service.ts`文件中的 `CatsService` 类相关联。
+})
+export class AppModule {}
+```
+
+依赖注入是一种控制反转（_IoC_）技术，你可以将依赖的实例化委派给*IoC*容器（在 Nestjs 应用中为 Nestjs 运行时系统），而不是必须在自己的代码中执行。
+
+1. 用`@Injectable()`装饰器声明`CatsService`是一个可以由`Nest IoC`容器管理的类
+2. 在`CatsController`中声明一个依赖于`CatsService`令牌（token）的构造函数注入
+3. 在 `app.module.ts` 中，我们将标记 `CatsService`与 `cats.service.ts`文件中的 `CatsService` 类相关联。
+
+当 `Nest IoC` 容器实例化 `CatsController` 时，它首先查找所有依赖项。 当找到 `CatsService` 依赖项时，它将对 CatsService 令牌(token)执行查找，并根据上述步骤（上面的＃3）返回 `CatsService` 类。 假定单例范围（默认行为），Nest 然后将创建 `CatsService` 实例，将其缓存并返回，或者如果已经缓存，则返回现有实例。
+tips：我们忽略的一个重要方面是，分析依赖项代码的过程非常复杂，并且发生在应用程序引导期间。
+
 ## 自定义提供者
+
+### 标准提供者
+
+```
+providers: [
+  {
+    provide: CatsService,
+    useClass: CatsService,
+  },
+];
+```
+
+### 值提供者（useValue）
+
+```
+ providers: [
+    {
+      provide: CatsService,
+      useValue: mockCatsService,
+    },
+  ],
+```
+
+### 非类提供者
+
+除了使用字符串作为令牌之外，还可以使用 JavaScript Symbol。
+
+````
+ providers: [
+    {
+      provide: 'CONNECTION',
+      useValue: connection,
+    },
+  ],
+
+// 我们使用 @Inject() 装饰器。这个装饰器只接受一个参数——令牌。
+@Injectable()
+export class CatsRepository {
+  constructor(@Inject('CONNECTION') connection: Connection) {}
+}
+```
+
+### 类提供者
+useClass语法允许您动态确定令牌应解析为的类。
+````
+//  例如，假设我们有一个抽象（或默认）的 ConfigService 类。 根据当前环境，我们希望 `Nest 提供配置服务的不同实现。 以下代码实现了这种策略。
+const configServiceProvider = {
+  provide: ConfigService,
+  useClass:
+    process.env.NODE_ENV === 'development'
+      ? DevelopmentConfigService
+      : ProductionConfigService,
+};
+
+@Module({
+  providers: [configServiceProvider],
+})
+export class AppModule {}
+
+```
+
+### 工厂提供者 (useFactory)
+
 
 
 ## 异步提供者
@@ -149,8 +265,6 @@ findOne(@Param('id', UserByIdPipe) userEntity: UserEntity) {
 ## 跨平台
 
 ## 测试
-
-
 
 # 技术
 
@@ -180,3 +294,4 @@ findOne(@Param('id', UserByIdPipe) userEntity: UserEntity) {
 路由是不可变的，可变的是用户，用户的角色，权限等
 
 数据库建立一个 permission 表去对应路由和权限
+````
