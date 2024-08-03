@@ -1,18 +1,30 @@
 # 请求执行顺序
 
-client side ---> middleware ---> guard ---> interceptor ---> pipe ---> route handle ---> middleware ---> interceptor ---> client side
+client side ---> middleware ---> route handle ---> middleware ---> client side
+当路由使用`use`装饰器时，第一个装饰器运行结束，视为 route handle 运行结束
 
-# 纠正
+client side ---> guard ---> interceptor ---> pipe ---> route handle ---> interceptor ---> client side
 
 # 补强：
+**_全局守卫，排除特定路由？_**
+全局守卫需要自己实例化，
+reflector不会被依赖注入需要自己实例化（知识点）
 
-管道概念
+根据request对象中的路由来判断？
+根据SetMetadata来判断（怎么注入reflector实例）
+有没有更好的办法
 
-测试一下各装饰器的执行顺序
 
-测试 use 的执行顺序
 
----
+# 问题与解答：
+
+- 定义装饰器的位置对功能模块是否有影响
+  比如：把`SetMetadata`放在守卫上面，守卫里的`Reflector`是否会取不到值
+  各个功能模块的位置好像是已经被定义好了，所以装饰器的位置并不会影响其执行的顺序
+
+- 模块间的相互引用
+  比如：有一个父模块和若干子模块和子服务，在父模块中导入这些子模块，在子模块中可以使用其他子模块吗？
+  不可以，如果 A 模块依赖 B 模块，B 模块又依赖 A 模块，参考 **_循环依赖_**
 
 # 概述
 
@@ -24,13 +36,18 @@ client side ---> middleware ---> guard ---> interceptor ---> pipe ---> route han
 
 Nest 有一个内置的控制反转（"IoC"）容器，可以解决 providers 之间的关系。@Injectable() 装饰器只是冰山一角, 并不是定义 providers 的唯一方法。相反，您可以使用普通值、类、异步或同步工厂。
 
-### 基于属性的注入**_(不是很懂)_**
+### 基于属性的注入 **_(不是很懂)_**
 
 如果顶级类依赖于一个或多个 providers，那么通过从构造函数中调用子类中的 super() 来传递它们就会非常烦人了。因此，为了避免出现这种情况，可以在属性上使用 @Inject() 装饰器。
 
 ## 模块
 
-### 模块的引用（依赖注入）
+模块是具有`@Module()`装饰器的类。`@Module()`装饰器提供了元数据，Nest 用它来组织应用程序结构
+![](./Modules_1.png)
+
+每个 Nest 应用程序至少有一个模块，即根模块。根模块是 Nest 开始安排应用程序树的地方。
+
+除了根模块，其他模块至少需要注册一次（就是在其他模块中导入（`imports`）），全局模块建议在根模块中注册
 
 ## 中间件
 
@@ -53,9 +70,17 @@ Nest 有一个内置的控制反转（"IoC"）容器，可以解决 providers �
   它们将在验证路由参数，查询字符串参数，和请求体正文的情景中工作。
 
 在路由处理函数上对处理函数中的每一个参数使用
-当使用路由管道的时候，路由处理函数的每一个参数都会调用管道
-实体类 可以用 `implements` 实现`type`，结合 prisma 的类型实现转换和验证
 
+当使用路由管道的时候，路由处理函数的每一个参数都会调用管道
+
+管道的执行顺序：
+当一个路由处理函数上同时有路由管道和参数管道
+先执行路由管道（根据路由管道定义的顺序执行，最后将执行结果传给参数管道处理），
+再执行参数管道（根据管道定义的顺序执行）。
+
+根据路由函数定义的参数顺序反向依次应用以上规则（先执行完路由管道，再执行参数管道）
+
+实体类 可以用 `implements` 实现`type`，结合 prisma 的类型实现转换和验证
 场景一：根据 id 从数据库查找用户实体返回
 
 ```ts
@@ -71,7 +96,7 @@ findOne(@Param('id', UserByIdPipe) userEntity: UserEntity) {
 守卫在中间件之后，在拦截器和管道之前
 **授权**：它们根据运行时出现的某些条件（例如权限，角色，访问控制列表等）来确定给定的请求是否由路由处理程序处理。这通常称为授权。
 
-**_全局守卫，排除特定路由？_**
+使用`useGuards`守卫的执行顺序与定义顺序相同
 
 ## 拦截器
 
@@ -82,6 +107,8 @@ findOne(@Param('id', UserByIdPipe) userEntity: UserEntity) {
 - 转换从函数抛出的异常
 - 扩展基本函数行为
 - 根据所选条件完全重写函数（例如：缓存目的）
+
+使用`UseInterceptors`根据定义顺序执行（洋葱模型），返回结果作为上一个执行函数的`next.handle`返回值
 
 ## 自定义装饰器
 
@@ -95,6 +122,8 @@ findOne(@Param('id', UserByIdPipe) userEntity: UserEntity) {
 
 # 基本原理
 
+
+
 ## 循环依赖
 
 ## 模块参考
@@ -104,11 +133,14 @@ findOne(@Param('id', UserByIdPipe) userEntity: UserEntity) {
 ## 应用上下文
 
 - reflect
+四个方法分别是什么意思
+
+
 - SetMetadata
 
 # 技术
 
-## HTTP模块
+## HTTP 模块
 
 # 安全
 
