@@ -179,7 +179,7 @@ tips：我们忽略的一个重要方面是，分析依赖项代码的过程非�
 
 ### 标准提供者
 
-```
+```ts
 providers: [
   {
     provide: CatsService,
@@ -190,7 +190,7 @@ providers: [
 
 ### 值提供者（useValue）
 
-```
+```ts
  providers: [
     {
       provide: CatsService,
@@ -203,7 +203,7 @@ providers: [
 
 除了使用字符串作为令牌之外，还可以使用 JavaScript Symbol。
 
-````
+```ts
  providers: [
     {
       provide: 'CONNECTION',
@@ -220,7 +220,7 @@ export class CatsRepository {
 
 ### 类提供者
 useClass语法允许您动态确定令牌应解析为的类。
-````
+```ts
 //  例如，假设我们有一个抽象（或默认）的 ConfigService 类。 根据当前环境，我们希望 `Nest 提供配置服务的不同实现。 以下代码实现了这种策略。
 const configServiceProvider = {
   provide: ConfigService,
@@ -234,16 +234,262 @@ const configServiceProvider = {
   providers: [configServiceProvider],
 })
 export class AppModule {}
-
 ```
 
 ### 工厂提供者 (useFactory)
+`useFactory` 语法允许动态创建提供程序。实工厂函数的返回实际的 `provider` 。
+一个简单的工厂可能不依赖于任何其他的提供者。
+更复杂的工厂可以自己注入它需要的其他提供者来计算结果。
+对于后一种情况，工厂提供程序语法有一对相关的机制:
+1. 工厂函数可以接受(可选)参数。
+2. `inject` 属性接受一个提供者数组，在实例化过程中，Nest 将解析该数组并将其作为参数传递给工厂函数。这两个列表应该是相关的: Nest 将从 `inject` 列表中以相同的顺序将实例作为参数传递给工厂函数。
+```ts
+const connectionFactory = {
+  provide: 'CONNECTION',
+  useFactory: (optionsProvider: OptionsProvider) => {
+    const options = optionsProvider.get();
+    return new DatabaseConnection(options);
+  },
+  inject: [OptionsProvider],
+};
 
+@Module({
+  providers: [connectionFactory],
+})
+export class AppModule {}
+```
 
+### 别名提供者 (useExisting)
+`useExisting` 语法允许您为现有的提供程序创建别名。这将创建两种访问同一提供者的方法。
+在下面的示例中，(基于string)令牌 'AliasedLoggerService' 是(基于类的)令牌 LoggerService 的别名。
+假设我们有两个不同的依赖项，一个用于 'AlilasedLoggerService' ，另一个用于 LoggerService 。如果两个依赖项都用单例作用域指定，它们将解析为同一个实例。
+```ts
+@Injectable()
+class LoggerService {
+  /* implementation details */
+}
+
+const loggerAliasProvider = {
+  provide: 'AliasedLoggerService',
+  useExisting: LoggerService,
+};
+
+@Module({
+  providers: [LoggerService, loggerAliasProvider],
+})
+export class AppModule {}
+```
+
+### 非服务提供者
+虽然提供者经常提供服务，但他们并不限于这种用途。提供者可以提供任何值。
+例如，提供程序可以根据当前环境提供配置对象数组，如下所示:
+```ts
+const configFactory = {
+  provide: 'CONFIG',
+  useFactory: () => {
+    return process.env.NODE_ENV === 'development'
+      ? devConfig
+      : prodConfig;
+  },
+};
+
+@Module({
+  providers: [configFactory],
+})
+export class AppModule {}
+
+```
+
+### **导出自定义提供者**
+与任何提供程序一样，自定义提供程序的作用域仅限于其声明模块。
+要使它对其他模块可见，必须导出它。
+要导出自定义提供程序，我们可以使用其 *令牌* 或完整的 *提供程序对象*。
+```ts
+const connectionFactory = {
+  provide: 'CONNECTION',
+  useFactory: (optionsProvider: OptionsProvider) => {
+    const options = optionsProvider.get();
+    return new DatabaseConnection(options);
+  },
+  inject: [OptionsProvider],
+};
+
+@Module({
+  providers: [connectionFactory],
+  exports: ['CONNECTION'],
+})
+export class AppModule {}
+
+```
 
 ## 异步提供者
+其语法是使用 `useFactory` 语法的 `async/await`。工厂返回一个承诺，工厂函数可以等待异步任务。
+在实例化依赖于(注入)这样一个提供程序的任何类之前，Nest将等待承诺的解决。
 
-## 动态模块
+```ts
+{
+  provide: 'ASYNC_CONNECTION',
+  useFactory: async () => {
+    const connection = await createConnection(options);
+    return connection;
+  },
+}
+
+```
+
+### 注入
+与任何其他提供程序一样，异步提供程序通过其令牌被注入到其他组件。
+在上面的示例中，您将使用结构`@Inject('ASYNC_CONNECTION')`。
+
+
+
+## 动态模块（DynamicModule）
+**模块定义**像提供者和控制器这样的组件组，它们作为整个应用程序的模块部分组合在一起。
+它们为这些组件提供了执行上下文或范围。
+例如，模块中定义的提供程序对模块的其他成员可见，而不需要导出它们。当提供者需要在模块外部可见时，它首先从其主机模块导出，然后导入到其消费模块。
+
+### 常规模块或静态模块的导入与Nest解析
+```ts
+// users.module.ts
+import { Module } from '@nestjs/common';
+import { UsersService } from './users.service';
+
+@Module({
+  providers: [UsersService],
+  exports: [UsersService],
+})
+export class UsersModule {}
+
+// auth.module.ts
+import { Module } from '@nestjs/common';
+import { AuthService } from './auth.service';
+import { UsersModule } from '../users/users.module';
+
+@Module({
+  imports: [UsersModule],
+  providers: [AuthService],
+  exports: [AuthService],
+})
+export class AuthModule {}
+
+
+// auth.service.ts
+import { Injectable } from '@nestjs/common';
+import { UsersService } from '../users/users.service';
+
+@Injectable()
+export class AuthService {
+  constructor(private readonly usersService: UsersService) {}
+  /*
+    Implementation that makes use of this.usersService
+  */
+}
+
+```
+上述代码我们将其称为静态模块绑定。`Nest`在主模块和消费模块中已经声明了连接模块所需的所有信息。
+这个过程中发生了什么。Nest通过以下方式使 UsersService 在 AuthModule中可用:
+1. 实例化 `UsersModule` ，包括传递导入 `UsersModule` 本身使用的其他模块，以及传递的任何依赖项(参见[自定义提供程序](#自定义提供者))。
+
+2. 实例化 `AuthModule` ，并将 `UsersModule` 导出的提供者提供给 `AuthModule` 中的组件(就像在 `AuthModule` 中声明它们一样)。
+
+3. 在 `AuthService` 中注入 `UsersService` 实例。
+
+
+### 什么是动态模块
+一个模块根据其配置的不同，而拥有不同的行为。
+动态模块的注册方法需要返回一个`DynamicModule`，它具有与静态模块相同的属性，外加一个称为模块（`module`）的附加属性。`module`属性用作模块的名称，并且应与模块的类名相同。
+
+```ts
+// app.module.ts
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { ConfigModule } from './config/config.module';
+
+@Module({
+  imports: [ConfigModule.register({ folder: './config' })],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule {}
+
+```
+
+动态模块本身可以导入其他模块。
+动态模块依赖于其他模块的提供程序，则可以使用可选的`imports`属性导入它们。同样，这与使用`@Module()`装饰器为静态模块声明元数据的方式完全相似。
+***对于动态模块，模块选项对象的所有属性都是可选的，模块除外***
+
+```ts
+// config.module.ts
+import { DynamicModule, Module } from '@nestjs/common';
+import { ConfigService } from './config.service';
+
+@Module({})
+export class ConfigModule {
+  static register(): DynamicModule {
+    return {
+      module: ConfigModule,
+      providers: [ConfigService],
+      exports: [ConfigService],
+    };
+  }
+}
+
+```
+定制`ConfigModule`行为的显而易见的解决方案是在静态`register()`方法中向其传递一个`options`对象。这很好地处理了将一个`options`对象传递给我们的动态模块。
+那么我们如何在`ConfigModule`中使用`options`对象呢？
+我们知道，我们的`ConfigModule`基本上是一个提供和导出可注入服务（`ConfigService`）供其他提供者使用。实际上我们的`ConfigService`需要读取`options`对象来定制它的行为。
+我们需要将`options`对象注入`ConfigService`。当然，我们将使用依赖注入来做到这一点。
+我们的`ConfigModule`提供`ConfigService`。而`ConfigService`又依赖于只在运行时提供的`options`对象。因此，在运行时，我们首先将`options`对象绑定到`Nest IoC`容器，然后让`Nest`将其注入`ConfigService`。
+
+```ts
+// Config.module.ts
+import { DynamicModule, Module } from '@nestjs/common';
+
+import { ConfigService } from './config.service';
+
+@Module({})
+export class ConfigModule {
+  static register(options): DynamicModule {
+    return {
+      module: ConfigModule,
+      providers: [
+        {
+          provide: 'CONFIG_OPTIONS',
+          useValue: options,
+        },
+        ConfigService,
+      ],
+      exports: [ConfigService],
+    };
+  }
+}
+
+// Config.service.ts
+import { Injectable, Inject } from '@nestjs/common';
+
+import * as dotenv from 'dotenv';
+import * as fs from 'fs';
+
+import { EnvConfig } from './interfaces';
+
+@Injectable()
+export class ConfigService {
+  private readonly envConfig: EnvConfig;
+
+  constructor(@Inject('CONFIG_OPTIONS') private options) {
+    const filePath = `${process.env.NODE_ENV || 'development'}.env`;
+    const envFile = path.resolve(__dirname, '../../', options.folder, filePath);
+    this.envConfig = dotenv.parse(fs.readFileSync(envFile));
+  }
+
+  get(key: string): string {
+    return this.envConfig[key];
+  }
+}
+
+```
+
 
 ## 注入作用域
 
