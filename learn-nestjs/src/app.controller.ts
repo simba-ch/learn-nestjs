@@ -13,13 +13,15 @@ import { Module1Service } from './module1/module1.service';
 import { Module2Service } from './module2/module2.service';
 import { Aggregation } from './aggregation/aggregation.decorator';
 import { Custom } from './custom/custom';
+import { CatsService } from './cats/cats.service';
 
 @Controller()
 export class AppController {
   constructor(
     private readonly module1Service: Module1Service,
     // private readonly module2Service: Module2Service,
-    @Inject('Custom') private readonly customProvider: Custom
+    @Inject('Custom') private readonly customProvider: Custom,
+    private readonly catsService: CatsService
   ) { }
 
   @UsePipes(Route1Pipe, Route2Pipe)
@@ -104,5 +106,10 @@ export class AppController {
   @Get('custom_provider')
   async testCustomProvider() {
     return this.customProvider.sayHello()
+  }
+
+  @Get('cat')
+  async FindOneForCat() {
+    return this.catsService.crate()
   }
 }

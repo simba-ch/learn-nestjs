@@ -4,9 +4,10 @@ import { LoggerMiddleware } from './logger/logger.middleware';
 import { Module1Module } from './module1/module1.module';
 import { GlobalModule1Module } from './global-module1/global-module1.module';
 import { Custom } from './custom/custom';
+import { CatsModule } from './cats/cats.module';
 
 @Module({
-  imports: [Module1Module, GlobalModule1Module],
+  imports: [Module1Module, GlobalModule1Module, CatsModule],
   controllers: [AppController],
   providers: [{
     provide: 'Custom',
